@@ -1,0 +1,55 @@
+\documentclass[12pt, letterpaper, oneside]{article}
+ \usepackage[nolinks]{qrcode}
+ \usepackage[absolute,overlay]{textpos}
+ \usepackage{geometry}                		
+\geometry{letterpaper, margin= 0in}    
+\usepackage{graphicx}
+\usepackage{tikz}
+
+ 			
+\begin{document}
+
+
+
+% FRAME 
+\begin{textblock*}{8.5in}[0.5, 0.5](4.25in, 6in) % {block width} [anchor point] (coords) 
+\begin{center}
+\begin{tikzpicture}[yscale = 0.87, xscale = 0.93]
+\draw[line width = 5, opacity =0.15] (0,0.2) rectangle (8.5in, 11in);
+\end{tikzpicture}
+\end{center}
+\end{textblock*}
+% END FRAME
+
+% FRAME MESSAGE
+\begin{textblock*}{8.5in}[0.5, 0](4.25in, 0.7in) % {block width} [anchor point] (coords) 
+\begin{center}
+\fbox{{\tt DO NOT WRITE OUTSIDE THE MARKED AREA}}
+\end{center}
+\end{textblock*}
+% END FRAME MESSAGE
+
+
+% EXAM PAGE
+\pagestyle{empty}
+\begin{textblock*}{8.5in}[0.5, 0.5](4.25in, 6in) % {block width} [anchor point] (coords) 
+\begin{center}
+{\includegraphics[width=1\textwidth]{FILENAME}}
+\end{center}
+\end{textblock*}
+% END EXAM PAGE
+
+
+%% QR CODE
+\begin{textblock*}{11cm}[1, 0](8.25in,0.25in) % {block width} [anchor point] (coords) 
+\begin{tikzpicture}
+\draw[opacity = 0] (-8, 0) rectangle (2.2 , -2.2);
+\node[fill=white, anchor= north west] at (0,0)
+{\qrcode[height=20mm, level=H]{QR_STRING}};
+\node[anchor =  north east] at (0, 0) {\small\tt \begin{tabular}{r} QR_LABEL \end{tabular}};
+\end{tikzpicture}
+\end{textblock*}
+%% END QR CODE
+
+
+\end{document}  
