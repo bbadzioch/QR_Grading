@@ -1,0 +1,37 @@
+\documentclass[11pt, letterpaper, oneside]{report}  	
+\usepackage{geometry}                		
+\geometry{letterpaper, margin= 0mm, top = 2mm}          
+\usepackage{amsmath,amssymb,amsthm,eucal, units}         		
+\usepackage{graphicx}
+\usepackage{tikz}				
+\usepackage{pifont}
+ \usepackage[absolute,overlay]{textpos}
+ % for handling spaces in path names
+\usepackage[space]{grffile}		
+			
+\begin{document}
+\pagestyle{empty}
+
+\includegraphics[width=0.93\textwidth]{FILENAME}
+
+\def\rw{21.4}
+\def\offset{0.2}
+\def\boxnum{BOXNUM}
+\pgfmathsetmacro\boxw{(\rw - (\boxnum+1)*\offset)/\boxnum}
+\pgfmathsetmacro\totboxnum{\boxnum-1}
+\def\grboxnum{\boxnum}
+\begin{textblock*}{8in}[0, 1](-0.2in,10.95in) % {block width} [anchor point] (coords) 
+\begin{tikzpicture}[scale=1]
+\draw[red, fill=red!10] ( 0, -0.7) rectangle (\rw, 2);
+\foreach \x/\y/\z in {SCORES}{
+\draw[fill=white, very thick] (\offset*\x + \boxw*\x  - \boxw, 0.7) rectangle 
+    node{\huge \tt  \y}  node[yshift=-10mm]{\large \bf \tt \z} +(\boxw, 1);
+};
+\foreach \x/\y/\z in {GRADE}{
+\draw[fill=white, very thick] (\offset*\x + \boxw*\x  - \boxw, 0.7) rectangle 
+    node{\color{red}\huge \tt  \y}  node[yshift=-10mm]{\large \bf\tt \z}  +(\boxw, 1);
+};
+\end{tikzpicture}
+\end{textblock*}
+
+\end{document}  

@@ -4,7 +4,6 @@
 \usepackage{amsmath,amssymb,amsthm,eucal, units}         		
 \usepackage{graphicx}
 \usepackage{tikz}				
-\usepackage{hyperref}
 \usepackage{pifont}
  \usepackage[absolute,overlay]{textpos}
  			
@@ -13,18 +12,18 @@
 
 {\includegraphics[width=0.93\textwidth]{FILENAME}};
 
-\begin{Form}
+
 \begin{textblock*}{8in}[0.5, 1](4.25in,11in) % {block width} [anchor point] (coords) 
 \begin{equation*}
 \begin{tikzpicture}[scale=0.5]
-\draw[red, fill=red!10] ( -1.3*SHIFT , -0.7) rectangle (1.3*SHIFT, 2);
-\foreach \x in {0,...,MAXPOINTS}{
-\node at (1.3*\x - 1.3*SHIFT +1.3, 1) {\CheckBox[width=1em, checkboxsymbol= \ding{54}, name = NAME.PROBLEMNUM.\x]{}};
-\node at (1.3*\x - 1.3*SHIFT + 1.4, 0) {\tt\x};
+\def{\maxpoints}{MAXPOINTS}
+\draw[red, fill=red!10] ( 0, -0.7) rectangle (1.5*\maxpoints + 2, 2);
+\foreach \x in {0,...,\maxpoints}{
+\draw[fill=white] (1 + 1.5*\x - 1.5, 1) rectangle +(1, 1);
+\node at (1 + 1.5*\x - 0.75, 0) {\tt\x};
 };
 \end{tikzpicture}
 \end{equation*}
 \end{textblock*}
-\end{Form}
 
 \end{document}  

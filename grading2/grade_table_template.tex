@@ -1,0 +1,29 @@
+\documentclass[11pt, letterpaper, oneside]{report}  	
+\usepackage{geometry}                		
+\geometry{letterpaper, margin= 0mm, top = 2mm}          
+\usepackage{amsmath,amssymb,amsthm,eucal, units}         		
+\usepackage{graphicx}
+\usepackage{tikz}				
+\usepackage{pifont}
+ \usepackage[absolute,overlay]{textpos}
+ 
+ % for handling spaces in path names
+\usepackage[space]{grffile}		
+			
+\begin{document}
+\pagestyle{empty}
+
+\includegraphics[width=0.93\textwidth]{FILENAME}
+
+\begin{textblock*}{8in}[0, 1](-0.2in,10.98in) % {block width} [anchor point] (coords) 
+\begin{tikzpicture}[scale=0.5]
+\def\maxpoints{MAXPOINTS}
+\draw[red, fill=red!10] ( 0, -0.7) rectangle (1.5*26+ 1.8 + 2, 2.1);
+\foreach \x in {0,...,\maxpoints}{
+\draw[fill=white] (1.25 + 1.5*\x , 0.7) rectangle +(1, 1);
+\node at (1 + 1.5*\x + 0.75, 0) {\bf\tt\x};
+};
+\end{tikzpicture}
+\end{textblock*}
+
+\end{document}  
