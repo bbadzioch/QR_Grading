@@ -18,6 +18,13 @@ from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdftypes import resolve1
 
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+from reportlab.lib import colors
+from reportlab.graphics.barcode import qr
+from reportlab.graphics.shapes import Drawing 
+from reportlab.graphics import renderPDF
 
 
 import tempfile
@@ -330,14 +337,19 @@ def compile_latex(source, output_file, output_directory = None):
 
 
 
-def make_exams(template, N, output_file=None, output_directory = None):
+def add_qr_codes(template, N, qr_prefix, output_file=None, output_directory = None, add_backpages = False):
+    
     '''
     Produces pdf files with copies of an exam from a given LaTeX template file
 
     :tamplate:
         Name of the LaTeX template file with the exam.
     :N:
-       Integer. The number of copies of the exam to be produced.
+        Integer. The number of copies of the exam to be produced.
+    :qr_prefix:
+        Prefix of QR codes added to the pdf file pages. The QR code for each page 
+        will be (qr_prefix)_(copy number)_(page number). (e.g. MTH309_002_P03, if
+        qr_prefix="MTH309"). 
     :output_file:
         Name of the pdf files to be produced; these files will be named
         output_file_num.pdf where num is the number of the exam copy.
@@ -346,36 +358,151 @@ def make_exams(template, N, output_file=None, output_directory = None):
         Name of the directory where the pdf files will be saved.
         If none given the current directory will be used. If the given directory
         does not exist, it will be created.
+    :add_backpages:
+        Adds backside pages to the pdf file with a message that these pages will not 
+        be graded. This is intended for two-sided printing. 
 
     Returns:
-        A tuple consisting of the pdflatex subprocess return code and
-    its stdout stream
+        None
     '''
 
     if output_directory == None:
         output_directory = os.getcwd()
-    # create the output direxctory if needed
+    # create the output directory if needed
     if not os.path.isdir(output_directory):
         os.makedirs(output_directory)
 
     # if no name of the output file, use the template file name
     if output_file == None:
-        output_file = os.path.splitext(os.path.basename(template))[0]
-
-    with open(template) as foo:
-        template_tex = foo.read()
-
+        output_file = os.path.basename(template)
+    output_file = os.path.splitext(output_file)[0]
+    
+    
     for n in range(1, N+1):
-        print(f"Compiling: {n:03}\r", end="")
-        pnum = itertools.count()
-        exam_copy = re.sub(r"PLACEHOLDER", lambda x: f'{n:03}-P{next(pnum):02}', template_tex)
-        c = compile_latex(exam_copy, output_file = f"{output_file}_{n:03}", output_directory = output_directory)
-        # if LateX compilation fails, return LaTeX compilation log.
-        if c[0] != 0:
-            return c
+        source = pdf.PdfFileReader(open(template, 'rb')) 
+        print(f"Processing copy number: {n}\r", end="")
+        writer = pdf.PdfFileWriter()
+        
+        for k in range(source.numPages):
+            
+            qr_string = f"{qr_prefix}-{n:03}-P{k:02}"     
+            pdf_bytes = io.BytesIO()
+            
+            c = canvas.Canvas(pdf_bytes, pagesize=letter)
+            c.setFont('Courier', 11.5)
+            c.setFillColor("black")
+            c.drawRightString(6.6*inch,9.54*inch, qr_string)
+            
+            qr_code = qr.QrCodeWidget(qr_string, barLevel = "H")
+            bounds = qr_code.getBounds()
+            width = bounds[2] - bounds[0]
+            height = bounds[3] - bounds[1]
+            d = Drawing(transform=[80./width,0,0,80./height,0,0])
+            d.add(qr_code)
+            renderPDF.draw(d, c, 6.65*inch, 9.4*inch)
+            c.save()
+        
+            qr_pdf = pdf.PdfFileReader(pdf_bytes).getPage(0)
+            page = source.getPage(k)
+            page.mergePage(qr_pdf)
+            writer.addPage(page)
+            
+            if  add_backpages:
+                back_str1 = "THIS PAGE WILL NOT BE GRADED"
+                back_str2 = "USE IT FOR SCRATCHWORK ONLY"
+                back_bytes = io.BytesIO()
+                back = canvas.Canvas(back_bytes, pagesize=letter)
+                back.setFont('Helvetica', 12)
+                back.setFillColor("black")
+                back.drawCentredString(4.25*inch, 8*inch, back_str1)
+                back.drawCentredString(4.25*inch, 7.8*inch, back_str2)
+                back.save()
+                back_pdf = pdf.PdfFileReader(back_bytes).getPage(0)
+                writer.addPage(back_pdf)
+                
+        destination  = os.path.join(output_directory, f"{output_file}_{n:03}.pdf")
+        with open(destination, "wb") as foo:
+            writer.write(foo)
+    print("QR coded files ready." + 40*" ")
 
-    print("Done!"+ " "*30)
-    return None
+
+def insert_score_table(fname, output_file=None, points=20):
+    
+    '''
+    Adds score tables to pdf files. 
+
+    :fname:
+        Name of the pdf file. The score table will be added to each page of this file. 
+    :output_file:
+        Name of the file to be produced. If None, the output file will be saved as t_fname. 
+    :points:
+        Maximal score in the score table. Should be not more than 25.
+    Returns:
+        None
+    '''
+    
+    # if no name of the output file, use the template file name
+    if output_file == None:
+        head, tail = os.path.split(fname)
+        output_file = os.path.join(head, "t_" + tail)
+    
+    # if source pdf is rotated we need to adjust parameters for merging it with 
+    # the score table; rotations dictionary stores these parameters for all possible 
+    # rotation angles
+    rotations = {0: {"rotation": 0, "tx": 0.2*inch, "ty": 0.6*inch}, 
+             90: {"rotation": 270, "tx": 0.2*inch, "ty": 11.1*inch}, 
+             180: {"rotation": 180, "tx": 8.5*inch, "ty": 11.1*inch},
+             270: {"rotation": 90, "tx": 8.5*inch, "ty": 0.6*inch}}
+    # scaling factor for the source pdf; note: if it is changed then
+    # the values of tx and ty in the rotations dictionary may need to be 
+    # adjusted as well
+    scale = 0.95
+    
+    source_file = pdf.PdfFileReader(open(fname, 'rb'))
+    writer = pdf.PdfFileWriter()
+    
+    for k in range(source_file.numPages):
+        
+        source = source_file.getPage(k) 
+        # make pdf with the score table
+        pdf_bytes = io.BytesIO()
+        c = canvas.Canvas(pdf_bytes, pagesize=letter)
+        h, w = 11, 8.5
+
+        # draw background of the score table 
+        c.setLineWidth(.5)
+        c.setStrokeColor("red")
+        c.setFillColorRGB(1, 0.85, 0.85)
+        c.rect(0.05*inch, 0.05*inch, (w - 0.1)*inch, 0.5*inch, stroke=1, fill=1)
+
+        #draw score boxes
+        # width and heigh of score boxes
+        rsize = 0.19*inch
+        #spacing between score boxes
+        offset = 0.11*inch
+
+        c.setFont('Helvetica', 10)
+        c.setStrokeColor("black")
+        for i in range(points+1):
+            c.setFillColor("white")
+            c.rect(0.2*inch +i*(rsize + offset), 0.28*inch, rsize, rsize, stroke=1, fill=1) 
+            c.setFillColor("black")
+            c.drawCentredString(0.2*inch +i*(rsize + offset) + 0.5*rsize, 0.12*inch,str(i))
+        c.save()
+        score_pdf = pdf.PdfFileReader(pdf_bytes).getPage(0)
+
+        # get rotation angle of the source pdf 
+        try:
+            rot = int(source.get('/Rotate'))%360
+        except:
+            rot = 0
+
+        # merge the score table with the source pdf and save it
+        score_pdf.mergeRotatedScaledTranslatedPage(source, scale = scale, **rotations[rot], expand=False)
+        writer.addPage(score_pdf)
+        
+    with open(output_file, "wb") as foo:
+            writer.write(foo)
 
 
 class ExamCode():
@@ -457,6 +584,8 @@ def covers_file(f):
 
 def format_table(page, template, maxpoints=10):
     '''
+    OBSOLETE 
+
     Formats a LaTeX template to add a score table to a given
     pdf page
 
@@ -488,7 +617,6 @@ class PrepareGrading(GradingBase):
 
     def __init__(self, 
                  maxpoints, 
-                 score_table_template, 
                  main_dir = None, 
                  gradebook = None, 
                  init_grading_data=False, 
@@ -499,8 +627,7 @@ class PrepareGrading(GradingBase):
 
         if type(maxpoints) != list:
             maxpoints = [maxpoints]
-        self.maxpoints = maxpoints
-        self.score_table_template = score_table_template        
+        self.maxpoints = maxpoints       
         self.show_pnums = show_pnums
 
     def add_score_table(self):
@@ -541,16 +668,13 @@ class PrepareGrading(GradingBase):
             max_score = self.maxpoints[min(page_num-1, len(self.maxpoints)-1)]
             max_score_dict[page_num] = max_score
 
-            tex = format_table(page = f, template = self.score_table_template, maxpoints = max_score)
-            c = compile_latex(tex, output_file = output_file , output_directory = self.pages_dir)
-            if c[0] != 0:
-                return f, c
-            print(f"{os.path.basename(output_file)}   -->   {c[0]}\r", end="")
-        print("Score tables added." + 40*" ")
+            insert_score_table(fname = f, output_file = os.path.join(self.pages_dir,output_file), points=max_score)
+            print(f"{fcode.base} -> Done\r", end="")
 
         grading_data = self.get_grading_data()
         grading_data["maxpoints"] = max_score_dict
         self.set_grading_data(grading_data)
+        print("Score tables added")
 
 
     def read_bubbles(self, img, dilx=(4,10), dily=(10, 4)):
@@ -1068,8 +1192,13 @@ def read_problem_scores(fname, maxpoints, treshold = 250):
 
     pages = pdf2image.pdf2image.convert_from_path(fname)
     # row and column offset of the first score box in the score table
-    row = 2104
-    col = 61
+    row_offset = 2110
+    col_offset = 44
+
+    # shift from the left edge of one score box to the next one
+    box_shift = 60
+    # width and height of a score box
+    box_size = 30
 
     #list of scores
     scores = []
@@ -1078,8 +1207,8 @@ def read_problem_scores(fname, maxpoints, treshold = 250):
         score_table = []
         # iterate over score boxes in the score table
         for i in range(maxpoints+1):
-            x = col + i*59
-            box = img[row:row+32, x:x+32, :]
+            x = col_offset + i*box_shift
+            box = img[row_offset : row_offset + box_size, x : x + box_size, :]
             if box.mean() < treshold:
                 score_table.append(i)
 
