@@ -1,0 +1,15 @@
+Dear {fname},
+
+I am attaching an pdf file containing your graded MTH 309 Exam 1.
+The 'Piazza' box in the score table shows the bonus points for posting
+a welcome message on Piazza at the beginning of the semester.
+The 'Hill' box is the percentage bonus for the Hill cipher extra credit assignment.
+
+Exam 1 statistics are as follows:
+Mean: 76
+Median: 78
+Standard deviation: 16
+
+Best regards,
+
+Bernard Badzioch
