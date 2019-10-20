@@ -692,7 +692,8 @@ class PrepareGrading(GradingBase):
         files = [f for f in files if not ExamCode(f).has_table()]
         files.sort()
 
-        max_score_dict = {}
+        grading_data = self.get_grading_data()
+        max_score_dict = grading_data["maxpoints"]
 
         # iterate over pdf file with exam pages
         for f in files:
@@ -1275,12 +1276,19 @@ class PrepareGrading(GradingBase):
         print("\n\nFinishing...")
         # record information which scanned files has been processed
         grading_data = self.get_grading_data()
+        num_missing_data_pages = len(grading_data["missing data"])
         grading_data["processed_scans"] = list(set(processed_scans_set).union(processed))
         self.set_grading_data(grading_data)
 
         # remove the pages directory, it is not needed anymore
         shutil.rmtree(self.pages_dir)
+        
         print("\nGrading files ready.")
+        if num_missing_data_pages > 0:
+            print(f"There are {num_missing_data_pages} with missing QR codes or person number data")
+        else:
+            print("All pages processed successfully.")
+
 
 
 
