@@ -45,8 +45,8 @@ Exam preparation: Use the make_exams function (requires an exam template file).
 
 PREPARATION FOR GRADING:
 Exam scans need to be placed in a directory named "scans"
-* A gradebook file must be a csv file with at least one column named 
-  "person_number" with student UB person numbers. 
+* A gradebook file must be a csv file with at least one column named
+  "person_number" with student UB person numbers.
 * Once thi is done use the prepare_grading function.
 * Scanned exams will be diassebled into pdf files with induvidual exam pages
   and  saved in the directory "pages" (which is automatically created).
@@ -69,26 +69,26 @@ class GradingBase():
         '''
         Converts a single pdf page into an image.
         :main_dir:
-            The main directory in which all grading files will be stored. 
-            Prior to the start of grading it should contain a subdirectory 
+            The main directory in which all grading files will be stored.
+            Prior to the start of grading it should contain a subdirectory
             named 'scans' with with pdf files of scanned exams. If main_dir
-            is None the current working directory will be used. 
+            is None the current working directory will be used.
         :gradebook:
-            A csv file used in grading. Prior to the start of grading it should 
-            contain at least one column with heading 'person_number' containing 
-            person numbers of students taking the exam. If gradebook is None, 
-            it will be assumed that the gradebook file is called gradebook.csv 
-            and it is located in main_dir. 
+            A csv file used in grading. Prior to the start of grading it should
+            contain at least one column with heading 'person_number' containing
+            person numbers of students taking the exam. If gradebook is None,
+            it will be assumed that the gradebook file is called gradebook.csv
+            and it is located in main_dir.
         :init_grading_data:
-            Bollean. If True, auxiliary files used in grading will be reset to the 
-            initial status, and the grading process will start from scratch.   
+            Bollean. If True, auxiliary files used in grading will be reset to the
+            initial status, and the grading process will start from scratch.
         '''
 
         if main_dir is None:
             self.main_dir = os.getcwd()
         else:
             self.main_dir = main_dir
-        
+
         # the directory with scanned exams
         self.scans_dir = os.path.join(self.main_dir, "scans")
         # a directory for temporary files used in the grading process
@@ -118,7 +118,7 @@ class GradingBase():
         self.init_grading_data = {"maxpoints": {},
                                   "processed_scans": [],
                                   "page_lists" : {},
-                                  "missing_data" : [], 
+                                  "missing_data" : [],
                                   "emails_sent" : []
                                   }
         if init_grading_data:
@@ -127,9 +127,9 @@ class GradingBase():
                  os.remove(self.missing_data_pages)
 
 
-        # Columns of the self.gradebook file. The file must have the self.pnum_column to start the grading 
-        # process, and the self.email_column when the graded exams are being sent to students. The other 
-        # columns will be created automatically, if needed. 
+        # Columns of the self.gradebook file. The file must have the self.pnum_column to start the grading
+        # process, and the self.email_column when the graded exams are being sent to students. The other
+        # columns will be created automatically, if needed.
         self.pnum_column = "person_number"
         self.email_column = "email"
         self.qr_code_column = "qr_code"
@@ -173,8 +173,8 @@ class GradingBase():
 
     def split_for_grading_files(self, dest_dir):
         '''
-        When exams are assembled by problem, this function can be used to split them 
-        into individial pages, with file names reflecting the QR code on each page. 
+        When exams are assembled by problem, this function can be used to split them
+        into individial pages, with file names reflecting the QR code on each page.
 
         :dest_dir:
             The directory where the pdf files with exam pages will be saved.
@@ -402,7 +402,7 @@ def compile_latex(source, output_file, output_directory = None):
 def add_qr_codes(template, N, qr_prefix, output_file=None, output_directory = None, add_backpages = False):
 
     '''
-    Produces pdf files with copies of an exam with QR codes identifying each page of each copy added. 
+    Produces pdf files with copies of an exam with QR codes identifying each page of each copy added.
 
     :tamplate:
         Name of the pdf file to make copies from.
@@ -410,7 +410,7 @@ def add_qr_codes(template, N, qr_prefix, output_file=None, output_directory = No
         Integer. The number of copies to be produced.
     :qr_prefix:
         Prefix of QR codes added to the pdf file pages. The QR code for each page
-        will be (qr_prefix)_(copy number)_P(page number). (e.g. MTH309_002_P03, for 
+        will be (qr_prefix)_(copy number)_P(page number). (e.g. MTH309_002_P03, for
         the 3rd page of the second copy of the exam with qr_prefix="MTH309").
         If qr_prefix is an empty string, QR codes will have the form (copy number)_P(page number)
         (e.g. 002_P03).
@@ -450,11 +450,11 @@ def add_qr_codes(template, N, qr_prefix, output_file=None, output_directory = No
 
         if qr_prefix != "":
             qr_prefix = qr_prefix + "-"
-        
+
         # iterate over exam pages
         for k in range(source.numPages):
 
-            # create a pdf page with the QR code 
+            # create a pdf page with the QR code
             qr_string = f"{qr_prefix}{n:03}-P{k:02}"
             pdf_bytes = io.BytesIO()
 
@@ -491,7 +491,7 @@ def add_qr_codes(template, N, qr_prefix, output_file=None, output_directory = No
                 back.save()
                 back_pdf = pdf.PdfFileReader(back_bytes).getPage(0)
                 writer.addPage(back_pdf)
-        
+
         # save an exam copy
         destination  = os.path.join(output_directory, f"{output_file}_{n:03}.pdf")
         with open(destination, "wb") as foo:
@@ -569,19 +569,19 @@ def covers_file(f):
 
 class PrepareGrading(GradingBase):
     '''
-    Class defining mathods used to prepare exams for grading. 
+    Class defining mathods used to prepare exams for grading.
     '''
 
     def __init__(self, maxpoints, main_dir = None, gradebook = None, init_grading_data=False, show_pnums = False):
         '''
         :maxpoints:
-            A list with the maximal possible score of each exam problem. Can be also given as an integer, if the maximal 
-            score for each problem is the same. 
+            A list with the maximal possible score of each exam problem. Can be also given as an integer, if the maximal
+            score for each problem is the same.
         :show_pnums:
-            Boolean. If True, then when person numbers are read from  exam cover pages, images showing the reading process 
-            will be displayes. 
-        
-        The reamining arguments are inherited from the GradingBase constructor. 
+            Boolean. If True, then when person numbers are read from  exam cover pages, images showing the reading process
+            will be displayes.
+
+        The reamining arguments are inherited from the GradingBase constructor.
         '''
 
         GradingBase.__init__(self, main_dir, gradebook, init_grading_data)
@@ -606,7 +606,7 @@ class PrepareGrading(GradingBase):
             Name of the file to be produced. If None, the output file will be saved as t_fname.
         :points:
             Integer. The maximal score in the score table. Should be not more than 25 to fit all score boxes.
-        
+
         Returns:
             None
         '''
@@ -624,14 +624,14 @@ class PrepareGrading(GradingBase):
                      180: {"rotation": 180, "tx": 8.5*inch, "ty": 11.1*inch},
                      270: {"rotation": 90, "tx": 8.5*inch, "ty": 0.6*inch}}
 
-        # scaling factor for the source pdf; 
-        # note: if the scale factor is changed then the values of tx and ty in the rotations 
+        # scaling factor for the source pdf;
+        # note: if the scale factor is changed then the values of tx and ty in the rotations
         # dictionary may need to be adjusted as well
         scale = 0.95
 
         source_file = pdf.PdfFileReader(open(fname, 'rb'))
         writer = pdf.PdfFileWriter()
-        
+
         # iterate over source pages
         for k in range(source_file.numPages):
 
@@ -652,14 +652,14 @@ class PrepareGrading(GradingBase):
             c.setStrokeColor("black")
             for i in range(points+1):
                 c.setFillColor("white")
-                c.rect(self.table_margin + self.box_left_pad +i*(self.box_size + self.box_spacing), 
-                       self.box_bottom, 
-                       self.box_size, 
-                       self.box_size, 
+                c.rect(self.table_margin + self.box_left_pad +i*(self.box_size + self.box_spacing),
+                       self.box_bottom,
+                       self.box_size,
+                       self.box_size,
                        stroke=1, fill=1)
                 c.setFillColor("black")
-                c.drawCentredString(self.table_margin + self.box_left_pad +i*(self.box_size + self.box_spacing) + 0.5*self.box_size, 
-                                    self.text_label_bottom, 
+                c.drawCentredString(self.table_margin + self.box_left_pad +i*(self.box_size + self.box_spacing) + 0.5*self.box_size,
+                                    self.text_label_bottom,
                                     str(i))
             c.save()
             score_pdf = pdf.PdfFileReader(pdf_bytes).getPage(0)
@@ -673,7 +673,7 @@ class PrepareGrading(GradingBase):
             # merge the score table with the source pdf and save it
             score_pdf.mergeRotatedScaledTranslatedPage(source, scale = scale, **rotations[rot], expand=False)
             writer.addPage(score_pdf)
-        
+
         # save the output file
         with open(output_file, "wb") as foo:
                 writer.write(foo)
@@ -681,10 +681,10 @@ class PrepareGrading(GradingBase):
 
     def add_score_tables(self):
         '''
-        Adds score tables to pdf files with exam pages. The resulting files 
-        are saved in the self.pages_dir with names prefixed by 't_'. 
-        I also writes the information what is the maximal score for each exam 
-        problem into the json file with grading data. 
+        Adds score tables to pdf files with exam pages. The resulting files
+        are saved in the self.pages_dir with names prefixed by 't_'.
+        I also writes the information what is the maximal score for each exam
+        problem into the json file with grading data.
         '''
 
         # select pdf files with exam pages which do not have a score table
@@ -725,10 +725,10 @@ class PrepareGrading(GradingBase):
 
     def read_bubbles(self, img, dilx=(4,10), dily=(10, 4)):
         '''
-        Reads person number from the bubble form on the exam cover page. In order 
-        for this function to work properly the rectangle with the bubble form must be 
-        detected as the countour with the largest area on the page. Preprocessing will 
-        remove light colors, so a light background etc. will not interfere with this. 
+        Reads person number from the bubble form on the exam cover page. In order
+        for this function to work properly the rectangle with the bubble form must be
+        detected as the countour with the largest area on the page. Preprocessing will
+        remove light colors, so a light background etc. will not interfere with this.
 
         :img:
             A numpy array encoding an image of the cover page
@@ -738,7 +738,7 @@ class PrepareGrading(GradingBase):
         :dilx:
         :dily:
             Tuples of two integers. They are used to dilate the image, making edges thicker which
-            can help to find the contour of the bubble form. Dilations specified by dilx and dily 
+            can help to find the contour of the bubble form. Dilations specified by dilx and dily
             are applied to the image consecutively (x direction first, then y).
 
         Returns:
@@ -748,8 +748,8 @@ class PrepareGrading(GradingBase):
 
         def sort_corners(a):
             '''
-            Given a 4x2 numpy array with coordinates of vertices 
-            of a rectangle, rearrange it, so that vertices appear 
+            Given a 4x2 numpy array with coordinates of vertices
+            of a rectangle, rearrange it, so that vertices appear
             in a clockwise order starting with the upper left.
             '''
             b = a.copy()
@@ -841,20 +841,20 @@ class PrepareGrading(GradingBase):
 
     def missing_qr_handler(self, scans, page_num, page_image, get_missing_data):
         '''
-        For a pdf page where QR code is not found, this function asks for user input. 
+        For a pdf page where QR code is not found, this function asks for user input.
 
         :scans:
-            The name of the file with which the pdf page is a part of. 
+            The name of the file with which the pdf page is a part of.
         :page_num:
-            The page number of the pdf page within the scans file. 
+            The page number of the pdf page within the scans file.
         :page_image:
-            A numpy array with the image of the page. 
+            A numpy array with the image of the page.
         :get_missing_data:
-            Boolean. If False do nothing. 
+            Boolean. If False do nothing.
 
         Returns:
-            A tuple (qr, qr_found) where qr is either None or a string with the QR code of the page 
-            provided by the user. qr_found is a boolean, True if the user entered a QR code. 
+            A tuple (qr, qr_found) where qr is either None or a string with the QR code of the page
+            provided by the user. qr_found is a boolean, True if the user entered a QR code.
         '''
 
         if not get_missing_data:
@@ -874,7 +874,7 @@ class PrepareGrading(GradingBase):
         msg += "QR code not found. \n\n"
         msg += "Enter the exam code or 's' to skip for now: "
         qr = input(msg)
-        
+
         qr = qr.strip()
         if qr == "s":
             qr_found = False
@@ -886,38 +886,38 @@ class PrepareGrading(GradingBase):
 
     def missing_pnum_handler(self, pnum, gradebook_df, scans, page_num, page_image, get_missing_data, show_page):
         '''
-        For a pdf page with exam cover the student person number was not correctly read this function asks for user input. 
+        For a pdf page with exam cover the student person number was not correctly read this function asks for user input.
 
         :pnum:
-            The person number read from the page. This function is called is when this number does not match any person 
-            number on the roster of students taking the exam. 
+            The person number read from the page. This function is called is when this number does not match any person
+            number on the roster of students taking the exam.
         :gradebook_df:
             Pandas dataframe with person numbers of students takinmg the exam. Used to verify that the user entry matches
-            one of these numbers. If the person number read from the exam page or provided by the user does not match 
-            any number in gradebook_df, the user will have an option to add the number to the dataframe. 
+            one of these numbers. If the person number read from the exam page or provided by the user does not match
+            any number in gradebook_df, the user will have an option to add the number to the dataframe.
         :scans:
-            The name of the file with which the pdf page is a part of. 
+            The name of the file with which the pdf page is a part of.
         :page_num:
-            The page number of the pdf page within the scans file. 
+            The page number of the pdf page within the scans file.
         :page_image:
-            A numpy array with the image of the page. 
+            A numpy array with the image of the page.
         :get_missing_data:
-            Boolean. If False do nothing. 
+            Boolean. If False do nothing.
         :show_page:
-            Boolean. A flag indicating if the page should be displayed to the user. If it has been already once displayed 
-            to ask for the QR code, we don't need to display it again. 
+            Boolean. A flag indicating if the page should be displayed to the user. If it has been already once displayed
+            to ask for the QR code, we don't need to display it again.
 
         Returns:
             A tuple (pnum, pnum_found, gradebook_df) where pnum is either None or a string with the person number, pnum_found
-            if pnum is a person number listed in gradebook_df, and gradebook_df is the dataframe - possibly modified by adding 
-            a new person number. 
+            if pnum is a person number listed in gradebook_df, and gradebook_df is the dataframe - possibly modified by adding
+            a new person number.
         '''
 
         if not get_missing_data:
             pnum = None
             pnum_found = False
             return pnum, pnum_found, gradebook_df
-        
+
         # display the page if needed
         if show_page:
             plt.figure(figsize = (15,20))
@@ -960,16 +960,16 @@ class PrepareGrading(GradingBase):
             - if the page is an exam cover page reads the person number
             - writes the exam code associated to the person number in the gradebook
             - saves each scanned page as an individual pdf file; the name of this file if the QR code of the page.
-            - saves a file with pages where QR code or person number needs to be provided by the user in 
-              the directory with scnned files. 
+            - saves a file with pages where QR code or person number needs to be provided by the user in
+              the directory with scnned files.
 
         :scans:
             The name of the pdf file to be processed.
         :get_missing_data:
-            Boolean. If False, pages where a QR code or the person number cannot be read will quietly saved 
-            into a separate file, to be processed later. If True, every such page will prompt the user for 
-            manual input. 
-    
+            Boolean. If False, pages where a QR code or the person number cannot be read will quietly saved
+            into a separate file, to be processed later. If True, every such page will prompt the user for
+            manual input.
+
         Returns:
             None
         '''
@@ -1002,15 +1002,15 @@ class PrepareGrading(GradingBase):
         if not processing_missing_data_file:
             missing_data = self.get_grading_data()["missing_data"]
             # if a file with pages with missing data already exists, copy its
-            # content to missing_data_writer; newly discovered pages with missing data 
+            # content to missing_data_writer; newly discovered pages with missing data
             # will be appened to it
             if had_missing_file:
                 missing_data_file = open(self.missing_data_pages, 'rb')
                 missing_data_pdf = pdf.PdfFileReader(missing_data_file)
                 missing_data_writer.appendPagesFromReader(missing_data_pdf)
-        # when processing a file with pages with missing data we will need a copy of 
+        # when processing a file with pages with missing data we will need a copy of
         # information about these pages
-        else: 
+        else:
             previous_missing_data  = self.get_grading_data()["missing_data"]
 
         # read scans; the file needs to remind open since pdf.PdfFileReader
@@ -1050,7 +1050,7 @@ class PrepareGrading(GradingBase):
                     # if qr code data is still missing, add the page to the missing data
                     # file, if meeded, and go to the next page
                     if not qr_found:
-                        # if we are processing the missing data file we want to keep the information 
+                        # if we are processing the missing data file we want to keep the information
                         # where the pages of this file originally came from
                         if processing_missing_data_file:
                             page_data = previous_missing_data[n]
@@ -1082,7 +1082,7 @@ class PrepareGrading(GradingBase):
                                                                                    show_page = show_page
                                                                                    )
                         if not pnum_found:
-                            # if we are processing the missing data file we want to keep the information 
+                            # if we are processing the missing data file we want to keep the information
                             # where the pages of this file originally came from
                             if processing_missing_data_file:
                                 page_data = previous_missing_data[n]
@@ -1119,8 +1119,8 @@ class PrepareGrading(GradingBase):
             grading_data = self.get_grading_data()
             grading_data["missing_data"] = missing_data
             self.set_grading_data(grading_data)
-        
-        # if there are no pages with missing data: 
+
+        # if there are no pages with missing data:
         else:
             if had_missing_file:
                 os.remove(self.missing_data_pages)
@@ -1138,8 +1138,8 @@ class PrepareGrading(GradingBase):
         Assembles pages of exam copies into files, one file containing
         all copies of a given page. Pages within each file are sorted
         according to their QR codes.
-        The information about QR codes of pages in each file is recorded 
-        in the grading data json file. 
+        The information about QR codes of pages in each file is recorded
+        in the grading data json file.
 
         Returns:
             None.
@@ -1149,8 +1149,8 @@ class PrepareGrading(GradingBase):
         files = glob.glob(os.path.join(self.pages_dir, "*.pdf"))
         # list of pdf file with score tables
         files = [f for f in files if ExamCode(f).has_table()]
-        
-        # directory whose keys are file names, and the value is the page number of a file.    
+
+        # directory whose keys are file names, and the value is the page number of a file.
         files_dir = {}
         for f in files:
             fcode = ExamCode(f)
@@ -1187,7 +1187,7 @@ class PrepareGrading(GradingBase):
         grading_data["page_lists"] = page_lists
         self.set_grading_data(grading_data)
 
-    
+
 
     def prepare_grading(self, files=None):
 
@@ -1201,15 +1201,15 @@ class PrepareGrading(GradingBase):
             function.
         - It assembles problem for grading and places them in the "for_grading" directory
             using the assemble_by_problem function.
-        - At the end the "pages" directory is removed, since it is not needed anymore. 
+        - At the end the "pages" directory is removed, since it is not needed anymore.
 
 
         :files:
-            Specify which files in the scans directory should be processed. 
-            - If None all files will be processed, except the once that were already processed on 
+            Specify which files in the scans directory should be processed.
+            - If None all files will be processed, except the once that were already processed on
             previous runs of this function.
-            - If 'all' all files will be processed without exceptions. 
-            - If a list, only files on the list will be processed. 
+            - If 'all' all files will be processed without exceptions.
+            - If a list, only files on the list will be processed.
 
         Returns:
             None
@@ -1218,7 +1218,7 @@ class PrepareGrading(GradingBase):
         # create the pages directory if needed for storing individual exam pages if needed
         if not os.path.exists(self.pages_dir):
             os.makedirs(self.pages_dir)
-        
+
         # get a list of scanned files that have been previously processed
         processed_scans = self.get_grading_data()["processed_scans"]
         # if the file with pages with missing data exists we will skip it, to handle it separately
@@ -1255,7 +1255,7 @@ class PrepareGrading(GradingBase):
                 continue
             self.read_scans(scans = fpath, get_missing_data=False)
             processed.append(f)
-        
+
         # get information about pages with missing QR/person number data
         if  os.path.isfile(self.missing_data_pages):
             print(f"Reading file:  {os.path.basename(self.missing_data_pages)}\n")
@@ -1265,10 +1265,10 @@ class PrepareGrading(GradingBase):
         print("\n\nAdding score tables... \n")
         self.add_score_tables()
 
-        # We are assuming that we are adding new pages to files with exam problems 
+        # We are assuming that we are adding new pages to files with exam problems
         # that may have been already partially graded. This will reassemble these
-        # problem files so that new pages are added and the already existing 
-        # pages are unchanged. 
+        # problem files so that new pages are added and the already existing
+        # pages are unchanged.
         self.split_for_grading_files(dest_dir = self.pages_dir)
         print("\n\nAssembling files for grading... \n")
         self.assemble_by_problem()
@@ -1282,7 +1282,7 @@ class PrepareGrading(GradingBase):
 
         # remove the pages directory, it is not needed anymore
         shutil.rmtree(self.pages_dir)
-        
+
         print("\nGrading files ready.")
         if num_missing_data_pages > 0:
             print(f"There are {num_missing_data_pages} with missing QR codes or person number data")
@@ -1294,7 +1294,7 @@ class PrepareGrading(GradingBase):
 
 class ReadScores(GradingBase):
     '''
-    Class defining mathods that read and record scores from graded exams. 
+    Class defining mathods that read and record scores from graded exams.
     '''
 
     @staticmethod
@@ -1316,8 +1316,8 @@ class ReadScores(GradingBase):
 
         Returns:
             A list of scores, one for each pdf page. If no marked score boxes are detected
-            on a page, the value of the list for the page will be "NONE". If multiple marked 
-            boxes are detected, the value of the list for the page will be "MULTI" followed by 
+            on a page, the value of the list for the page will be "NONE". If multiple marked
+            boxes are detected, the value of the list for the page will be "MULTI" followed by
             the list of the read scores.
         '''
 
@@ -1399,7 +1399,7 @@ class ReadScores(GradingBase):
                 return None
             score_dict_page = {p:s for (p,s) in zip(pages, score_list)}
             score_dict["prob_" + page_num] = score_dict_page
-        
+
         # conver the scores dictionary into dataframe with rows indexed by exam QR codes and
         # colmns labeled prob_n where n is the problem numnber
         scores_df = pd.DataFrame(score_dict)
@@ -1412,15 +1412,15 @@ class ReadScores(GradingBase):
         records exam scores in a gradebook with student data
 
         :save:
-            Boolean. If True the the gradebook data will be saved to a csv file. 
+            Boolean. If True the the gradebook data will be saved to a csv file.
         :new_gradebook:
-            The name of the csv file to save the data. If None, the data will be saved 
-            to self.gradebook. 
+            The name of the csv file to save the data. If None, the data will be saved
+            to self.gradebook.
 
         Returns:
-            A tuple of (scores_df, new_gradebook_df) pandas dataframes. scores_df contains 
-            problem scores indexed by exam QR codes.  new_gradebook_df contains exams scores 
-            merged with student data reasd from self.gradebook. 
+            A tuple of (scores_df, new_gradebook_df) pandas dataframes. scores_df contains
+            problem scores indexed by exam QR codes.  new_gradebook_df contains exams scores
+            merged with student data reasd from self.gradebook.
         '''
 
 
@@ -1429,12 +1429,12 @@ class ReadScores(GradingBase):
         else:
             save = True
             new_gradebook = os.path.join(self.main_dir, os.path.basename(new_gradebook))
-        
+
         # read exam scores
         scores_df = self.get_scores_df()
 
         problem_cols = scores_df.columns.tolist()
-        # add a column with total score for each exam; since some rows may contain 
+        # add a column with total score for each exam; since some rows may contain
         # "NONE" and "MULTI" values we need to skip over them
         scores_temp = scores_df.applymap(lambda x : pd.to_numeric(x,errors='coerce'))
         scores_df[self.total_column] = scores_temp[problem_cols].sum(axis=1).astype("int")
@@ -1446,12 +1446,12 @@ class ReadScores(GradingBase):
                 gradebook_df.drop(columns = col, inplace=True)
             except KeyError:
                 continue
-        
+
         # merge the gradebook data with exam scores
         new_gradebook_df = pd.merge(gradebook_df, scores_df, how = "left",  left_on = self.qr_code_column, right_index = True)
         new_gradebook_temp = new_gradebook_df.applymap(lambda x : pd.to_numeric(x,errors='coerce'))
         new_gradebook_df[self.total_column] = new_gradebook_temp[problem_cols].sum(axis=1).astype("int")
-        
+
         # insert the grade column if needed, for recording letter grades by the instructor
         if self.grade_column not in new_gradebook_df.columns:
             new_gradebook_df[self.grade_column] = ""
@@ -1466,24 +1466,24 @@ class ReadScores(GradingBase):
 
 class AssembleGradedExams(GradingBase):
     '''
-    Class defining mathods that assemble graded exams by student. 
+    Class defining mathods that assemble graded exams by student.
     '''
 
     def __init__(self, main_dir = None, gradebook = None, init_grading_data=False):
         '''
-        All rguments are inherited from the GradingBase constructor. 
+        All rguments are inherited from the GradingBase constructor.
         '''
 
         GradingBase.__init__(self, main_dir, gradebook, init_grading_data)
 
         gradebook_df =  pd.read_csv(self.gradebook)
 
-        # add the column for student email addresses if needed; it will need to be 
+        # add the column for student email addresses if needed; it will need to be
         # populated in order to send the exams back to students
         if self.email_column not in gradebook_df.columns:
             gradebook_df[self.email_column] = ""
             gradebook_df.to_csv(self.gradebook, index=False)
-    
+
 
     @staticmethod
     def cover_page_grades(fname=None, table_data=None, output_file=None):
@@ -1491,37 +1491,37 @@ class AssembleGradedExams(GradingBase):
         Add score table to the cover page of an exam
 
         :fname:
-            Name of the pdf file to add the score table to. 
+            Name of the pdf file to add the score table to.
         :table_data:
-            A dictionary with data to be inserted in the table. 
-            Keys of the dictinary will be used as labels of score boxes, 
-            the corresponding values will be printed in score boxes. 
-            If the dictionary has keys "grade" and "total" the corresponding 
-            values will be printed in red. 
+            A dictionary with data to be inserted in the table.
+            Keys of the dictinary will be used as labels of score boxes,
+            the corresponding values will be printed in score boxes.
+            If the dictionary has keys "grade" and "total" the corresponding
+            values will be printed in red.
         :output_file:
-            The name of the pdf file with the score table added. It None, 
-            fname prefixed with 't_' will be used. 
+            The name of the pdf file with the score table added. It None,
+            fname prefixed with 't_' will be used.
         '''
-        
+
         if output_file == None:
             head, tail = os.path.split(fname)
             output_file = os.path.join(head, "t_" + tail)
 
-        
+
         # make pdf with the score table
         pdf_bytes = io.BytesIO()
         c = canvas.Canvas(pdf_bytes, pagesize=letter)
-        
+
         num_boxes = len(table_data)
         page_w = 8.5*inch
         margin = 0.05*inch
         table_w = page_w - 2*margin
         table_h = 0.8*inch
-        
+
         box_spacing = 0.06*inch
-        # width of boxes will be adjusted depending on their number; for tables with 
-        # few score boxes the width will be fixed at 1.5 inch, otherwise boxed will be 
-        # sized to fill the width of the score table. 
+        # width of boxes will be adjusted depending on their number; for tables with
+        # few score boxes the width will be fixed at 1.5 inch, otherwise boxed will be
+        # sized to fill the width of the score table.
         box_w = min(1.5*inch, (table_w - box_spacing)/num_boxes  - box_spacing)
         box_h = 0.35*inch
         box_top_pad = 0.1*inch
@@ -1529,13 +1529,13 @@ class AssembleGradedExams(GradingBase):
         text_label_bottom = box_bottom - 0.2*inch
         text_data_bottom = box_bottom + 0.11*inch
         label_font_size = 10 if num_boxes < 14 else 9
-        
-        # draw background of the score table 
+
+        # draw background of the score table
         c.setLineWidth(.5)
         c.setStrokeColor("red")
         c.setFillColorRGB(1, 0.85, 0.85)
         c.rect(margin, margin, table_w, table_h, stroke=1, fill=1)
-        
+
         # draw score table
         c.setFillColor("white")
         for k, key in enumerate(table_data):
@@ -1555,7 +1555,7 @@ class AssembleGradedExams(GradingBase):
             c.setFont('Courier', 16)
             c.drawCentredString(box_left + 0.5*box_w, text_data_bottom, str(table_data[key]))
         c.save()
-        
+
         score_pdf = pdf.PdfFileReader(pdf_bytes).getPage(0)
         source = pdf.PdfFileReader(open(fname, 'rb')).getPage(0)
         # read rotation angle of the source pdf file
@@ -1583,15 +1583,15 @@ class AssembleGradedExams(GradingBase):
 
     def mark_score(self, fname, score, max_score, output_file):
         '''
-        Add a marker to the score table on an exam page indicating the score 
-        recorded for the page. 
+        Add a marker to the score table on an exam page indicating the score
+        recorded for the page.
 
         :fname:
-            Name of the pdf file with the page to add a marker to. 
+            Name of the pdf file with the page to add a marker to.
         :score:
-            Recorded problem score for the page 
+            Recorded problem score for the page
         :max_score:
-            Maximum possible score for problem on the page. 
+            Maximum possible score for problem on the page.
         :output_file:
             The name of the pdf file with the score table added.
 
@@ -1599,8 +1599,8 @@ class AssembleGradedExams(GradingBase):
             None
         '''
 
-        # if score is not an integer, or exceed the maximal score 
-        # that can be recorsed in the score table, just copy the file. 
+        # if score is not an integer, or exceed the maximal score
+        # that can be recorsed in the score table, just copy the file.
         try:
             score = int(score)
         except:
@@ -1612,25 +1612,25 @@ class AssembleGradedExams(GradingBase):
 
         # draw the marker
         pdf_bytes = io.BytesIO()
-        
+
         c = canvas.Canvas(pdf_bytes, pagesize=letter)
         c.setLineWidth(.5)
         # backdround marker square
         c.setStrokeColor("black")
         c.setFillColor("white")
-        c.rect(self.table_margin + self.box_left_pad + score*(self.box_size + self.box_spacing), 
+        c.rect(self.table_margin + self.box_left_pad + score*(self.box_size + self.box_spacing),
             self.box_bottom,
-            self.box_size, 
-            self.box_size, 
-            stroke=1, 
+            self.box_size,
+            self.box_size,
+            stroke=1,
             fill=1)
         # foreground marker square
         c.setFillColorRGB(0.5, 0, 0)
-        c.rect(self.table_margin + self.box_left_pad + score*(self.box_size + self.box_spacing) + self.mark_margin, 
+        c.rect(self.table_margin + self.box_left_pad + score*(self.box_size + self.box_spacing) + self.mark_margin,
             self.box_bottom + self.mark_margin,
-            self.box_size - 2*self.mark_margin, 
-            self.box_size - 2*self.mark_margin, 
-            stroke=0, 
+            self.box_size - 2*self.mark_margin,
+            self.box_size - 2*self.mark_margin,
+            stroke=0,
             fill=1)
         # marker label with the score
         c.setFont('Helvetica-Bold', 10)
@@ -1671,11 +1671,11 @@ class AssembleGradedExams(GradingBase):
     @staticmethod
     def flatten_pdf(fname):
         '''
-        This function can be used to flatten pdf, making anotations added in the 
+        This function can be used to flatten pdf, making anotations added in the
         grading process non-editable. It needs pdftops and ps2pdf to work.
 
         :fname:
-            The file to be flatten. The flattened file will have the same name. 
+            The file to be flatten. The flattened file will have the same name.
 
         Returns:
             None
@@ -1690,20 +1690,20 @@ class AssembleGradedExams(GradingBase):
 
     def assemble_by_student(self, extras = None, flatten = False):
         '''
-        Assembles graded exam files by student, adding score tables to the exam 
-        covers and score marks to other pages. 
+        Assembles graded exam files by student, adding score tables to the exam
+        covers and score marks to other pages.
 
         :extras:
-            By default the score table on the cover page will contain scores for each 
-            exam problem, the total score, and the letter grade. extras is a disctinary 
-            which can be used to add additional data to the score table. The values are 
+            By default the score table on the cover page will contain scores for each
+            exam problem, the total score, and the letter grade. extras is a disctinary
+            which can be used to add additional data to the score table. The values are
             names of gradebook columns that should be used. The key a string which will
-            used as the label of a score box in the score table. 
-        
+            used as the label of a score box in the score table.
+
         :flatten:
-            Boolean. If True, an attempt will be made to flatted the output pdf files. 
-            This will work only if pdftops and ps2pdf are installed, otherwise this option 
-            will have no effect. 
+            Boolean. If True, an attempt will be made to flatted the output pdf files.
+            This will work only if pdftops and ps2pdf are installed, otherwise this option
+            will have no effect.
         '''
 
         if extras is None:
@@ -1720,7 +1720,7 @@ class AssembleGradedExams(GradingBase):
 
         covers = sorted([f for f in glob.glob(os.path.join(temp_dir, "*.pdf")) if ExamCode(f).is_cover()])
         prob_cols = sorted([c for c in gradebook_df.columns.tolist() if "prob_" in c])
-        
+
         # a function for formatting numerical score table entries
         def format_scores(n):
             try:
@@ -1747,11 +1747,11 @@ class AssembleGradedExams(GradingBase):
 
             for k in extras:
                 score_table_data[k] =  format_scores(record[extras[k]].values[0])
-            
+
             # save the cover file with the added score table
             self.cover_page_grades(fname=cover_copy, table_data = score_table_data, output_file=cover)
             os.remove(cover_copy)
-        
+
         print(f"Score tables added." + 40*" ")
 
         pages = sorted([f for f in glob.glob(os.path.join(temp_dir, "*.pdf")) if not ExamCode(f).is_cover()])
@@ -1760,17 +1760,17 @@ class AssembleGradedExams(GradingBase):
         # add score marks to exam pages
         print(f"Adding score marks..." + 40*" ")
         for page in pages:
-            
+
             ex_code = ExamCode(page)
             print(f"{ex_code.base}\r", end="")
-            
+
             max_score = maxpoints[str(ex_code.get_page_num())]
-    
+
             page_copy = os.path.join(temp_dir, "copy_" + ex_code.base + ".pdf")
             shutil.copyfile(page, page_copy)
             qr = ex_code.get_exam_code()
             record = gradebook_df.loc[gradebook_df[self.qr_code_column] == qr]
-            scores = record[prob_cols].values[0] 
+            scores = record[prob_cols].values[0]
             # get page/problem number
             pagenum = ex_code.get_page_num()
             # get the recorded score for the page
@@ -1779,7 +1779,7 @@ class AssembleGradedExams(GradingBase):
             os.remove(page_copy)
         print(f"Score marks added." + 40*" ")
 
-        
+
         print("Assembling exams...")
         files = glob.glob(os.path.join(temp_dir, "*.pdf"))
         # set of exam codes identifying exam copies
@@ -1788,7 +1788,7 @@ class AssembleGradedExams(GradingBase):
         # create directory to store graded exams, assembled by student
         if not os.path.exists(self.graded_dir):
             os.makedirs(self.graded_dir)
-        
+
         # assemble graded exams
         for exam_code in codes:
             print(f"{exam_code}\r", end="")
@@ -1805,7 +1805,7 @@ class AssembleGradedExams(GradingBase):
                     self.flatten_pdf(f)
             except:
                 pass
-        
+
         # remove the temporary directory with individual exam pages
         shutil.rmtree(temp_dir)
 
@@ -1815,22 +1815,22 @@ class AssembleGradedExams(GradingBase):
 
 class EmailGradedExams(GradingBase):
     '''
-    Class defining mathods for emailing graded exams to students. 
+    Class defining mathods for emailing graded exams to students.
     '''
 
     def __init__(self, template = None, main_dir = None, gradebook = None,  init_grading_data=False):
         '''
         :template:
-            Name of a text file the the template of the email text. The text can contain {placeholders}, 
-            enclosed in braces. Each placeholder needs to be a name of a column of the gradebook. 
-            The message to each student will be formatted by replacing each placeholder by the value 
-            of the corresponding column, in the row corresponding to the student. If template is None, 
-            an empty string will be used as the email text.  
+            Name of a text file the the template of the email text. The text can contain {placeholders},
+            enclosed in braces. Each placeholder needs to be a name of a column of the gradebook.
+            The message to each student will be formatted by replacing each placeholder by the value
+            of the corresponding column, in the row corresponding to the student. If template is None,
+            an empty string will be used as the email text.
 
-            If the first line of the template file starts with the string 'subject:', the reminder of this 
-            line will be used as the subject of the message. 
-        
-         All other arguments are inherited from the GradingBase constructor. 
+            If the first line of the template file starts with the string 'subject:', the reminder of this
+            line will be used as the subject of the message.
+
+         All other arguments are inherited from the GradingBase constructor.
         '''
 
         GradingBase.__init__(self, main_dir, gradebook, init_grading_data)
@@ -1839,7 +1839,7 @@ class EmailGradedExams(GradingBase):
         self.smtp_server = "smtp.buffalo.edu"
         self.server_port = 465
 
-        # if the server refuses to send more emails at some point, we wil pause 
+        # if the server refuses to send more emails at some point, we wil pause
         # for this many seconds and then resume sending exams
         self.reconnect_period = 300
 
@@ -1861,7 +1861,7 @@ class EmailGradedExams(GradingBase):
         else:
             print(f"File {template} does not exist, exiting.")
             return None
-    
+
 
     @staticmethod
     def make_message(template_txt, subject, from_address, to_address, pdf_fname, **kwargs):
@@ -1869,31 +1869,31 @@ class EmailGradedExams(GradingBase):
         Prepare the email message
 
         :template_txt:
-            String the the template of the email text. 
+            String the the template of the email text.
         :subject:
             String with the subject of the message
         :from_address:
-            The sender email address. 
+            The sender email address.
         :to_address:
-            The recipient email address. 
+            The recipient email address.
         :pdf_fname:
             The name of the pdf files which will be attached to the email
         :**kwargs:
-            Keyword arguments which will be used to replace placeholders in the template of 
-            the text of the email. 
-        
+            Keyword arguments which will be used to replace placeholders in the template of
+            the text of the email.
+
         Returns:
             EmailMessage object
         '''
 
         # get message text by replacing placeholders with values of the keyword arguments
         msg_text = template_txt.format(**kwargs)
-        
+
         msg = EmailMessage()
         msg['Subject'] = subject
         msg['From'] = from_address
         msg['To'] = to_address
-        
+
         msg['Content-Type'] = "text/plain; charset=utf-8; format=flowed"
         msg.set_content(msg_text)
 
@@ -1901,20 +1901,20 @@ class EmailGradedExams(GradingBase):
         with open(pdf_fname, 'rb') as f:
             content = f.read()
             msg.add_attachment(content, maintype='application/pdf', subtype='pdf', filename=os.path.basename(pdf_fname))
-                
+
         body = msg.get_body()
         body.replace_header('Content-Type', 'text/plain; charset=utf-8; format=flowed')
-        
+
         return msg
-    
+
 
     @staticmethod
     def timer(seconds):
-        """ 
+        """
         Countdown timer.
 
         :seconds:
-            The number of seconds to count down from. 
+            The number of seconds to count down from.
         """
 
         for i in range(seconds,0,-1):
@@ -1926,25 +1926,25 @@ class EmailGradedExams(GradingBase):
 
     def send_exams(self, send_sample= False, resend = False):
         '''
-        Send emails 
+        Send emails
 
         :send_sample:
-            Boolean. If true a single email message will be send with the recipient address set 
-            to be the same as the sender address. Can be used to test if messages are properly formatted. 
+            Boolean. If true a single email message will be send with the recipient address set
+            to be the same as the sender address. Can be used to test if messages are properly formatted.
         :resend:
-            Boolean. The function records in the grading data to which email addresses messages have been sent already, 
-            and by default omits these addresses when the function is called again. If resend is True, this default 
-            is overriden, and email will be send to every email address in the gradebook. 
+            Boolean. The function records in the grading data to which email addresses messages have been sent already,
+            and by default omits these addresses when the function is called again. If resend is True, this default
+            is overriden, and email will be send to every email address in the gradebook.
         '''
-            
+
         if send_sample:
             print(f"Sending a sample message.\n")
-        
-        # get email addresses to which messages were previously sent 
+
+        # get email addresses to which messages were previously sent
         grading_data = self.get_grading_data()
         emails_sent = set(grading_data["emails_sent"])
 
-        # convert the gradebook into a list of dictionaries, one dictionary 
+        # convert the gradebook into a list of dictionaries, one dictionary
         # for each gradebook row
         gradebook_df = pd.read_csv(self.gradebook)
         gradebook_df = gradebook_df[gradebook_df[self.qr_code_column].notnull()]
@@ -1955,7 +1955,7 @@ class EmailGradedExams(GradingBase):
         if template_lines[0].lower().strip().startswith("subject:"):
             subject = template_lines[0][len("subject:"):].strip()
             template_txt = "\n".join(template_lines[1:]).strip()
-        # is the first line of the template file does not contain 
+        # is the first line of the template file does not contain
         # the subject, ask the user what the subject should be
         else:
             template_txt = "\n".join(template_lines).strip()
@@ -1969,13 +1969,13 @@ class EmailGradedExams(GradingBase):
         # prepare and send emails
         for record in gradebook_dict:
             pdf_fname = os.path.join(self.graded_dir, f"{record[self.qr_code_column]}.pdf")
-            
+
             # get recipient email address
             if  '@' in record['email']:
                 to_address = record['email'].strip()
             else:
                 to_address = record['email'].strip() + "@buffalo.edu"
-            
+
             # check is the message was previously sent
             if (not send_sample) and (not resend) and (to_address in emails_sent):
                 print(f"{to_address:30} *********** WAS SENT BEFORE, OMITTING")
@@ -1986,21 +1986,21 @@ class EmailGradedExams(GradingBase):
                 if not send_sample:
                     print(f"{to_address:30} *********** FILE {os.path.basename(pdf_fname)} NOT FOUND, OMITTING")
                 continue
-                
+
             if send_sample:
                 to_address = from_address
-                                    
+
             # format the email message
-            msg = self.make_message(template_txt= template_txt, 
-                                    subject=subject, 
-                                    from_address = from_address, 
-                                    to_address = to_address, 
-                                    pdf_fname = pdf_fname, 
+            msg = self.make_message(template_txt= template_txt,
+                                    subject=subject,
+                                    from_address = from_address,
+                                    to_address = to_address,
+                                    pdf_fname = pdf_fname,
                                     **record)
-            
+
             # send email
             send_success = False
-            while not send_success: 
+            while not send_success:
                 try:
                     server = smtplib.SMTP_SSL(self.smtp_server, self.server_port)
                     server.login(login_name, password)
@@ -2011,7 +2011,7 @@ class EmailGradedExams(GradingBase):
                     server.send_message(msg, from_addr = from_address, to_addrs = to_address)
                 except smtplib.SMTPException as ex:
                     print("{:30} *********** NOT SENT: {}".format(to_address, ex))
-                    #pause before reattempting to send the message 
+                    #pause before reattempting to send the message
                     self.timer(self.reconnect_period)
                 else:
                     print("{:30} *********** SENT".format(to_address))
@@ -2019,16 +2019,47 @@ class EmailGradedExams(GradingBase):
                     server.quit()
                     sleep(0.1)
             if send_sample:
-                break 
+                break
             else:
                 # save information that the email was sent
                 # we are saving it to the grading data file right away, in case
                 # the program gets interrupted for some reason
                 if send_success:
-                    emails_sent.add(to_address)   
+                    emails_sent.add(to_address)
                     grading_data = self.get_grading_data()
                     grading_data["emails_sent"] = list(emails_sent)
                     self.set_grading_data(grading_data)
         
-
         print("***FINISHED***")
+
+
+
+
+#wrappers
+
+def prepare_grading(maxpoints, main_dir = None, gradebook = None, init_grading_data=False, files=None):
+    
+    x = PrepareGrading(maxpoints = maxpoints, 
+                       main_dir = main_dir, 
+                       gradebook = gradebook, 
+                       init_grading_data=init_grading_data)
+    x.prepare_grading(files = files)
+
+
+def read_scores(main_dir = None, gradebook = None, new_gradebook = None, save=True):
+    
+    x = ReadScores(main_dir = main_dir, gradebook = gradebook)
+    x.get_scores(save=True, new_gradebook = new_gradebook)
+
+
+
+def assemble_exams(main_dir = None, gradebook = None, extras = None, flatten = False):
+    
+    x = AssembleGradedExams(main_dir = main_dir, gradebook = gradebook) 
+    x.assemble_by_student(extras = extras, flatten = flatten)
+
+
+def send_exams(main_dir = None, gradebook = None, template = None, send_sample=False, resend = False):
+    
+    x = EmailGradedExams(main_dir = main_dir, template = template, gradebook = gradebook)
+    x.send_exams(send_sample=send_sample, resend = resend)
